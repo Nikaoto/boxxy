@@ -1,0 +1,34 @@
+Boxxy
+
+MUST:
+* syntax highlighting
+* დირექტორია -> ნახაზ
+* გადაადგილება
+* ჩაკეცვა (-)
+* გაქრობა (x)
+* outline window on hover
+* outline connection on hover
+* move camera to window on connection click
+* ხაზები და ფუნქციების დაკავშირება
+* physics (each window is a Box2d rect)
+* image export
+* state/config export (so teammate can import)
+* juice
+* sfx
+* black boxing
+* spaghetti counter argument
+
+MAYBE:
+* node dragging (ერთს დრაგავ და მისი ყველა პირდაპირი შვილი მას თან მიყვება)
+* shift selection
+* rectangle selection
+* group movement
+* text placement
+* drawing (rectangle, line, circle)
+
+MAYBE MAYBE:
+* სქროლბარები და ფანჯრის გადიდება/დაპატარავება
+* ედიტინგი
+
+DREAMS:
+* online collab. Press C and launch server and others can join
