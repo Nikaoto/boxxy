@@ -112,6 +112,20 @@ function Camera:do_rel_zoom(val, x, y)
    )
 end
 
+function Camera:do_world_zoom(val, mx, my)
+   local prev_zoom = self.zoom
+   local wx = (mx - self.x ) / prev_zoom
+   local wy = (my - self.y ) / prev_zoom
+   self:do_zoom(val * prev_zoom)
+
+   -- Don't move if we didn't zoom
+   if prev_zoom == self.zoom then return end
+
+   -- Move the camera relative to the coordinates
+   self.x = mx - wx * self.zoom
+   self.y = my - wy * self.zoom
+end
+
 function Camera:apply()
    lg.translate(
       -self.x * self.zoom + self.w/2,

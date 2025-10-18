@@ -50,6 +50,7 @@ end
 function Box:draw()
 
    local x, y = self.body:getPosition()
+
    -- draw box
    lg.setColor(0.2, 0.4, 0.8)
    lg.rectangle("fill", x - self.w / 2, y - self.h / 2, self.w, self.h)

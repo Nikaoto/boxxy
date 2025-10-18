@@ -1,6 +1,8 @@
 Boxxy
 
 MUST:
++ rects
++ parsing
 * syntax highlighting
 * დირექტორია -> ნახაზ
 * გადაადგილება
@@ -10,7 +12,7 @@ MUST:
 * outline connection on hover
 * move camera to window on connection click
 * ხაზები და ფუნქციების დაკავშირება
-* physics (each window is a Box2d rect)
+~ physics (each window is a Box2d rect)
 * image export
 * state/config export (so teammate can import)
 * juice

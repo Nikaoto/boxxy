@@ -1,17 +1,47 @@
-Class = require("lib/Class")
+
+debugger = require("lib/debugger")
+require("lib/print")
+
+CHAR_W = 16
+CHAR_H = 20
+RENDER_WIDTH = 800
+RENDER_HEIGHT = 600
+
+love.graphics.setDefaultFilter("nearest", "nearest")
+inspect = require("lib/inspect")
 require("lib/string")
 require("lib/table")
 require("lib/math")
 
-inspect = require("lib/inspect")
+Class = require("lib/Class")
+Vector = require("lib/Vector")
+Camera = require("lib/Camera")
+
 require("state")
 
 lg = love.graphics
+lk = love.keyboard
+lm = love.mouse
 font = lg.newFont('fixedsys.ttf', 24)
 
 Box = require("Box")
+Connection = require("Connection")
 
-boxes = {}
+cam = Camera:new({
+   w = RENDER_WIDTH,
+   h = RENDER_HEIGHT,
+   move_speed = 10,
+   dir = Vector:new(0,0),
+})
+
+mouse_x, mouse_y = 0, 0
+mouse_dy = 0
+
+canvas = lg.newCanvas(400, 300)
+
+objects = {}
+conns_map = {}
+boxes_by_id = {}
 
 local world
 
@@ -20,10 +50,11 @@ function love.load()
 
    local state = make_state_from_dir(dir)
 
+   -- Spawn all boxes
    for i, box in ipairs(state) do
       local b = Box:new({
-         x = (i - 1) * 100 + 50,
-         y = i *100 + 50,
+         x = (i - 1) * 200 + 50,
+         y = i *300 + 50,
          phy_world = world,
 
          fn_id = box.id,
@@ -32,22 +63,122 @@ function love.load()
          text_string = box.text_string,
          line_count = box.line_count,
       })
-      table.insert(boxes, b)
+      table.insert(objects, b)
+      boxes_by_id[box.id] = b
    end
-   print(inspect(state))
+   --print(inspect(state))
+
+   -- Make connections map
+   for i, fun in ipairs(state) do
+      for j, conn in ipairs(fun.connections) do
+         if not conns_map[fun.id] then
+            conns_map[fun.id] = {}
+         end
+         table.insert(conns_map[fun.id], conn.fn_id)
+      end
+   end
+
+   -- Spawn connections
+   for parent_id, child_ids in pairs(conns_map) do
+      local parent = boxes_by_id[parent_id]
+      local px, py = parent.body:getPosition()
+      for i, child_id in ipairs(child_ids) do
+         local child = boxes_by_id[child_id]
+         local cx, cy = child.body:getPosition()
+         local k = table.ifind_fn(parent.connections, function(v)
+            return v.fn_id == child.fn_id
+         end)
+         if not k then break end
+         local c = Connection:new({
+            startpoint = Vector:new(
+               px + parent.connections[k].char * CHAR_W - parent.w/2,
+               5 + py + parent.connections[k].line * CHAR_H - parent.h/2),
+            endpoint = Vector:new(cx - child.w/2, cy - child.h/2)
+         })
+         table.insert(objects, c)
+      end
+   end
+
+   love.window.setMode(RENDER_WIDTH, RENDER_HEIGHT)
+end
+
+function love.wheelmoved(x, y)
+   if y > 0 then
+      mouse_dy = 1
+   elseif y < 0 then
+      mouse_dy = -1
+   end
 end
 
 function love.update(dt)
+   mouse_x, mouse_y = lm:getPosition()
+
+   if lk.isDown("q") or lk.isDown("escape") then
+      love.event.quit()
+      return
+   end
+
+   if mouse_dy ~= 0 then
+      cam:do_rel_zoom(mouse_dy, mouse_x, mouse_y)
+   end
+
+   -- Camera movement
+   cam.dir:set(0,0)
+   if lk.isDown("right") then
+      cam.dir.x = cam.dir.x + 1
+   elseif lk.isDown("left") then
+      cam.dir.x = cam.dir.x - 1
+   end
+   if lk.isDown("up") then
+      cam.dir.y = cam.dir.y - 1
+   elseif lk.isDown("down") then
+      cam.dir.y = cam.dir.y + 1
+   end
+   cam.dir:normalize()
+   if not cam.dir:is_zero() then
+      cam:do_move(cam.dir.x, cam.dir.y)
+   end
+
+   -- Camera zooming
+   if lk.isDown("-") then
+      cam:do_zoom(-2)
+   elseif lk.isDown("=") then
+      cam:do_zoom(2)
+   end
+
    world:update(dt)
 
-   for _, box in ipairs(boxes) do
+   for _, box in ipairs(objects) do
       -- box:update(dt)
    end
+
+   mouse_dy = 0
 end
 
 function love.draw()
+   lg.setCanvas(canvas)
+   lg.clear(0,0,0,0)
+   local w, h = canvas:getDimensions()
 
-   for _, box in ipairs(boxes) do
+   cam:apply()
+   lg.setColor(1,1,1,1)
+   for _, box in ipairs(objects) do
       box:draw()
    end
+
+   lg.setColor(1, 0, 0, 1)
+   lg.circle("fill", 0, 0, 10)
+
+   lg.setColor(0, 1, 0, 1)
+   local mx, my = cam:to_world(mouse_x, mouse_y)
+   lg.circle("fill", mx/2 - w/2 * cam.zoom, my/2 - h/2 * cam.zoom, 10)
+
+   lg.setColor(0, 0, 1, 1)
+   lg.circle("fill", mouse_x, mouse_y, 10)
+
+   cam:revert()
+   lg.setCanvas()
+
+   lg.setColor(1,1,1,1)
+   lg.draw(canvas, RENDER_WIDTH/2, RENDER_HEIGHT/2, 0, 2, 2, w/2, h/2)
 end

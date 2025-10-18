@@ -1,12 +1,24 @@
 local Connection = Class:extend({
-   
-   box = nil,
-
-   char = 0,
-   line = 0,
-   fn_id = 0,
+   startpoint = Vector:new(0,0),
+   endpoint = Vector:new(0,0),
 })
 
-function Connection:draw()
-
+function Connection:init()
 end
+
+function Connection:update()
+end
+
+function Connection:draw()
+   lg.setColor(1, 0, 0, 1)
+   lg.setLineWidth(3)
+   lg.line(
+      self.startpoint.x, self.startpoint.y,
+      self.endpoint.x,   self.endpoint.y
+   )
+
+   lg.setLineWidth(5)
+   lg.circle("line", self.startpoint.x, self.startpoint.y, 4)
+end
+
+return Connection
