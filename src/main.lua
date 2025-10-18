@@ -1,11 +1,13 @@
+require("lib/string")
+require("lib/table")
+require("lib/math")
+
 inspect = require("lib/inspect")
 require("state")
 
 
-
 function love.load()
    local state = make_state_from_dir(dir)
-   print(inspect(state))
 end
 
 function love.update(dt)
