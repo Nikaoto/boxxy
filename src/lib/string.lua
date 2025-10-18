@@ -114,3 +114,8 @@ end
 function string.delete_last_char(str)
    return string.sub(str, 1, -2)
 end
+
+function string.nmatch(str, sub)
+   local _, count = string.gsub(str, sub, "")
+   return count
+end

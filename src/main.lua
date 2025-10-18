@@ -1,4 +1,8 @@
 Class = require("lib/Class")
+require("lib/string")
+require("lib/table")
+require("lib/math")
+
 inspect = require("lib/inspect")
 require("state")
 
