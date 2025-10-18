@@ -43,6 +43,10 @@ function Box:resizeToText()
    self.fixture = love.physics.newFixture(self.body, self.shape, 1)
 end
 
+function Box:draw_connection_points()
+   
+end
+
 function Box:draw()
 
    local x, y = self.body:getPosition()
