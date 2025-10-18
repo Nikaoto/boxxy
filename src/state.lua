@@ -190,9 +190,9 @@ int main() {
 
    make_nodes(ctx, root)
    print(inspect(ctx))
-   return ctx
+   --return ctx
 
-   --[[return {
+   return {
       {
          id = 1,
          file = "main.lua",
@@ -234,7 +234,7 @@ int main() {
          line_count = 3,
          connections = {},
       }
-   }--]]
+   }
 end
 
 --[[
