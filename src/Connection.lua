@@ -1,6 +1,7 @@
 local Connection = Class:extend({
    startpoint = Vector:new(0,0),
    endpoint = Vector:new(0,0),
+   z = 2,
 })
 
 function Connection:init()

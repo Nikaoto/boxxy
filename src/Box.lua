@@ -1,6 +1,7 @@
 local Box = Class:extend({
    x = 0,
    y = 0,
+   z = 1,
    w = 100,
    h = 100,
    phy_world = nil,
@@ -21,6 +22,7 @@ function Box:init()
    self.body = love.physics.newBody(self.phy_world, self.x, self.y, "dynamic")
    self.shape = love.physics.newRectangleShape(self.w, self.h)
    self.fixture = love.physics.newFixture(self.body, self.shape, 1)
+   self.fixture:setRestitution(1)
 
    self.text_obj = love.graphics.newText(font, self.text_string)
    self.title_obj = love.graphics.newText(font, self.file)
@@ -45,12 +47,9 @@ function Box:resizeToText()
    self.fixture = love.physics.newFixture(self.body, self.shape, 1)
 end
 
-function Box:draw_connection_points()
-
-end
-
 function Box:isMouseOver()
    local mx, my = love.mouse.getPosition()
+   mx, my = cam:to_world(mx, my)
    local x, y = self.body:getPosition()
 
    local left   = x - self.w / 2
@@ -62,15 +61,14 @@ function Box:isMouseOver()
 end
 
 function Box:draw()
+   local x, y = self.body:getPosition()
    
    if self:isMouseOver() then
       lg.setColor(1, 1, 1)
-      lg.rectangle("fill", self.x - (self.w + self.outline) / 2, 
-                  self.y - (self.h + self.outline) / 2, 
+      lg.rectangle("fill", x - (self.w + self.outline) / 2, 
+                  y - (self.h + self.outline) / 2, 
                   self.w + self.outline, self.h + self.outline)
    end
-
-   local x, y = self.body:getPosition()
 
    -- draw box
    lg.setColor(0.2, 0.4, 0.8)
