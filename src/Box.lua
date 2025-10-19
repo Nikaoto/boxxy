@@ -64,31 +64,31 @@ function Box:draw()
    local x, y = self.body:getPosition()
    
    if self:isMouseOver() then
-      lg.setColor(1, 1, 1)
+      lg.setColor(colors.a_yellow)
       lg.rectangle("fill", x - (self.w + self.outline) / 2, 
                   y - (self.h + self.outline) / 2, 
                   self.w + self.outline, self.h + self.outline)
    end
 
    -- draw box
-   lg.setColor(0.2, 0.4, 0.8)
+   lg.setColor(colors.comments)
    lg.rectangle("fill", x - self.w / 2, y - self.h / 2, self.w, self.h)
 
    -- draw title
-   lg.setColor(1, 1, 0.8)
+   lg.setColor(colors.white)
    local title_x = x - self.w / 2 + self.title_padding
    local title_y = y - self.h / 2 + self.title_padding
    lg.draw(self.title_obj, math.floor(title_x, 0.5), math.floor(title_y, 0.5))
 
    -- draw line under title
-   lg.setColor(1, 1, 1)
+   lg.setColor(colors.comments)
    local line_y = title_y + self.title_obj:getHeight() + self.title_padding / 2
    lg.setColor(0.9, 0.9, 0.9)
    lg.setLineWidth(2)
    lg.line(x - self.w / 2 + self.title_padding, line_y, x + self.w / 2 - self.title_padding, line_y)
 
    -- draw code 
-   lg.setColor(1, 1, 1)
+   lg.setColor(colors.white)
    local text_x = x - self.w / 2 + self.padding
    local text_y = y - self.h / 2 + self.padding + self.title_obj:getHeight() + self.padding
    lg.draw(self.text_obj, math.floor(text_x, 0.5), math.floor(text_y, 0.5))

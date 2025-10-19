@@ -9,6 +9,7 @@ RENDER_HEIGHT = 1080
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 inspect = require("lib/inspect")
+colorlib = require("lib/colorlib")
 require("lib/rand")
 require("lib/string")
 require("lib/table")
@@ -17,8 +18,31 @@ require("lib/math")
 Class = require("lib/Class")
 Vector = require("lib/Vector")
 Camera = require("lib/Camera")
+Colorhex = require("lib/colorhex")
 
 require("state")
+
+local colors_alpha = 0.7
+colors = {
+   background = Colorhex("#272822"),
+   comments   = Colorhex("#75715E"),
+   white      = Colorhex("#F8F8F2"),
+   yellow     = Colorhex("#E6DB74"),
+   green      = Colorhex("#A6E22E"),
+   orange     = Colorhex("#FD971F"),
+   purple     = Colorhex("#AE81FF"),
+   pink       = Colorhex("#F92672"),
+   blue       = Colorhex("#66D9EF"),
+
+   a_yellow     = Colorhex("#E6DB74", colors_alpha),
+   a_green      = Colorhex("#A6E22E", colors_alpha),
+   a_orange     = Colorhex("#FD971F", colors_alpha),
+   a_purple     = Colorhex("#AE81FF", colors_alpha),
+   a_pink       = Colorhex("#F92672", colors_alpha),
+   a_blue       = Colorhex("#66D9EF", colors_alpha),
+}
+
+colors.darkgreen = colorlib.mix({}, colors.background, colors.green, 0.5)
 
 lg = love.graphics
 lk = love.keyboard
@@ -181,6 +205,31 @@ function love.update(dt)
    mouse_dy = 0
 end
 
+function drawGrid(cameraX, cameraY, zoom)
+    local gridSize = 50  -- size of each grid cell
+    local width, height = love.graphics.getDimensions()
+
+    -- use zoom for consistent spacing
+    local scaledGrid = gridSize * zoom
+
+    -- offset so grid moves with camera
+    local offsetX = (cameraX * zoom) % scaledGrid
+    local offsetY = (cameraY * zoom) % scaledGrid
+
+    love.graphics.setColor(0.2, 0.2, 0.2) -- grid color
+    love.graphics.setLineWidth(1)
+
+    -- vertical lines
+    for x = -offsetX, width, scaledGrid do
+        love.graphics.line(x, 0, x, height)
+    end
+
+    -- horizontal lines
+    for y = -offsetY, height, scaledGrid do
+        love.graphics.line(0, y, width, y)
+    end
+end
+
 function love.draw()
    table.stable_sort(objects, function(a,b)
       return (a.z or 0) > (b.z or 0)
@@ -189,12 +238,15 @@ function love.draw()
    --lg.setCanvas(canvas)
    lg.clear(0,0,0,0)
    local cw, ch = canvas:getDimensions()
+   
+   drawGrid(cam.x, cam.y, cam.zoom)
 
    cam:apply()
    lg.setColor(1,1,1,1)
    for _, box in ipairs(objects) do
       box:draw()
    end
+   
 
    -- Center
    lg.setColor(1, 0, 0, 1)
