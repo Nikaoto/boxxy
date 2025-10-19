@@ -206,28 +206,28 @@ function love.update(dt)
 end
 
 function drawGrid(cameraX, cameraY, zoom)
-    local gridSize = 50  -- size of each grid cell
-    local width, height = love.graphics.getDimensions()
+   local gridSize = 50  -- size of each grid cell
+   local width, height = love.graphics.getDimensions()
 
-    -- use zoom for consistent spacing
-    local scaledGrid = gridSize * zoom
+   -- use zoom for consistent spacing
+   local scaledGrid = gridSize * zoom
 
-    -- offset so grid moves with camera
-    local offsetX = (cameraX * zoom) % scaledGrid
-    local offsetY = (cameraY * zoom) % scaledGrid
+   -- offset so grid moves with camera
+   local offsetX = (cameraX * zoom) % scaledGrid
+   local offsetY = (cameraY * zoom) % scaledGrid
 
-    love.graphics.setColor(0.2, 0.2, 0.2) -- grid color
-    love.graphics.setLineWidth(1)
+   love.graphics.setColor(0.2, 0.2, 0.2) -- grid color
+   love.graphics.setLineWidth(1)
 
-    -- vertical lines
-    for x = -offsetX, width, scaledGrid do
-        love.graphics.line(x, 0, x, height)
-    end
+   -- vertical lines
+   for x = -offsetX, width, scaledGrid do
+      love.graphics.line(x, 0, x, height)
+   end
 
-    -- horizontal lines
-    for y = -offsetY, height, scaledGrid do
-        love.graphics.line(0, y, width, y)
-    end
+   -- horizontal lines
+   for y = -offsetY, height, scaledGrid do
+      love.graphics.line(0, y, width, y)
+   end
 end
 
 function love.draw()
