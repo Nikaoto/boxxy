@@ -2,6 +2,7 @@ local Box = Class:extend({
    x = 0,
    y = 0,
    z = 1,
+   obj_type = OBJ_TYPES.DEFAULT,
    w = 100,
    h = 100,
    phy_world = nil,
@@ -20,9 +21,14 @@ local Box = Class:extend({
 
 function Box:init()
    self.body = love.physics.newBody(self.phy_world, self.x, self.y, "dynamic")
+   self.body:setLinearDamping(20,20)
+   self.body:setFixedRotation(true)
    self.shape = love.physics.newRectangleShape(self.w, self.h)
    self.fixture = love.physics.newFixture(self.body, self.shape, 1)
-   self.fixture:setRestitution(1)
+   self.fixture:setUserData(self)
+   self.fixture:setCategory(self.obj_type)
+
+   self.body:setMass(1)
 
    self.text_obj = love.graphics.newText(font, self.text_string)
    self.title_obj = love.graphics.newText(font, self.file)
@@ -45,11 +51,15 @@ function Box:resizeToText()
    self.shape = love.physics.newRectangleShape(self.w, self.h)
    self.fixture:destroy()
    self.fixture = love.physics.newFixture(self.body, self.shape, 1)
+   self.fixture:setUserData(self)
+   self.fixture:setCategory(self.obj_type)
+   self.body:setMass(1)
 end
 
 function Box:isMouseOver()
    local mx, my = love.mouse.getPosition()
    mx, my = cam:to_world(mx, my)
+
    local x, y = self.body:getPosition()
 
    local left   = x - self.w / 2
@@ -58,6 +68,18 @@ function Box:isMouseOver()
    local bottom = y + self.h / 2
 
    return mx >= left and mx <= right and my >= top and my <= bottom
+end
+
+function Box:update(dt)
+   if self:isMouseOver() then
+      if lm.getCursor() == idle_cursor then
+         lm.setCursor(point_cursor)
+      end
+
+      if lm.isDown(1) then
+         lm.setCursor(grab_cursor)
+      end
+   end
 end
 
 function Box:draw()
@@ -92,7 +114,6 @@ function Box:draw()
    local text_x = x - self.w / 2 + self.padding
    local text_y = y - self.h / 2 + self.padding + self.title_obj:getHeight() + self.padding
    lg.draw(self.text_obj, math.floor(text_x, 0.5), math.floor(text_y, 0.5))
-
 end
 
 return Box

@@ -6,10 +6,17 @@ CHAR_W = 16
 CHAR_H = 20
 RENDER_WIDTH = 1920
 RENDER_HEIGHT = 1080
+MOUSE_MOVE_MARGIN = 100
+
+OBJ_TYPES = {
+   DEFAULT = 1,
+   CURSOR = 2,
+}
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 inspect = require("lib/inspect")
 colorlib = require("lib/colorlib")
+physics = require("lib/physics")
 require("lib/rand")
 require("lib/string")
 require("lib/table")
@@ -55,8 +62,10 @@ Connection = require("Connection")
 cam = Camera:new({
    w = RENDER_WIDTH,
    h = RENDER_HEIGHT,
-   move_speed = 10,
+   move_speed = 15,
    dir = Vector:new(0,0),
+   zoom = 0.2,
+   zoom_speed = 0.01,
 })
 
 mouse_x, mouse_y = 0, 0
@@ -64,21 +73,33 @@ mouse_dy = 0
 
 canvas = lg.newCanvas(400, 300)
 
+cursor = require("cursor")
+idle_cursor = lm.newCursor("img/hand_free.png", 64*0.33, 64*0.08)
+point_cursor = lm.newCursor("img/hand_point.png", 64*0.33, 64*0.08)
+click_cursor = lm.newCursor("img/hand_click.png", 64*0.33, 64*0.08)
+grab_cursor = lm.newCursor("img/hand_grab.png", 64*0.33, 64*0.08)
+
 objects = {}
 conns_map = {}
 boxes_by_id = {}
 
-local world
+collision_manager = require("collision_manager")
 
 function love.load()
    world = love.physics.newWorld(0, 0, true)
+   world:setCallbacks(
+      collision_manager.begin_contact,
+      collision_manager.end_contact
+   )
+   lm.setCursor(idle_cursor)
+   cursor:init(world)
 
    local state = make_state_from_dir(dir)
 
    -- Spawn all boxes
    for i, box in ipairs(state) do
       local b = Box:new({
-         x = 0 + rand.int(-50, 50),
+         x = 0 + rand.int(-500, 500),
          y = 0 + rand.int(-5, 5),
          phy_world = world,
 
@@ -136,7 +157,6 @@ end
 
 function love.keypressed(key)
    if key == "c" then
-   
       -- Spawn connections
       for parent_id, child_ids in pairs(conns_map) do
          local parent = boxes_by_id[parent_id]
@@ -160,7 +180,19 @@ function love.keypressed(key)
    end
 end
 
+function love.mousereleased(x, y, button, istouch, presses)
+   cursor:mousereleased(x, y, button, istouch, presses)
+end
+
+function love.mousepressed(x, y, button, istouch, presses)
+   cursor:mousepressed(x, y, button, istouch, presses)
+end
+
 function love.update(dt)
+   lm.setCursor(idle_cursor)
+   world:update(dt)
+   cursor:update(dt)
+
    mouse_x, mouse_y = lm:getPosition()
 
    if lk.isDown("q") or lk.isDown("escape") then
@@ -174,14 +206,14 @@ function love.update(dt)
 
    -- Camera movement
    cam.dir:set(0,0)
-   if lk.isDown("right") then
+   if lk.isDown("right") or mouse_x > RENDER_WIDTH-MOUSE_MOVE_MARGIN then
       cam.dir.x = cam.dir.x + 1
-   elseif lk.isDown("left") then
+   elseif lk.isDown("left") or mouse_x < MOUSE_MOVE_MARGIN then
       cam.dir.x = cam.dir.x - 1
    end
-   if lk.isDown("up") then
+   if lk.isDown("up") or mouse_y < MOUSE_MOVE_MARGIN then
       cam.dir.y = cam.dir.y - 1
-   elseif lk.isDown("down") then
+   elseif lk.isDown("down") or mouse_y > RENDER_HEIGHT-MOUSE_MOVE_MARGIN then
       cam.dir.y = cam.dir.y + 1
    end
    cam.dir:normalize()
@@ -196,10 +228,8 @@ function love.update(dt)
       cam:do_zoom(2)
    end
 
-   world:update(dt)
-
-   for _, box in ipairs(objects) do
-      -- box:update(dt)
+   for _, obj in ipairs(objects) do
+      obj:update(dt)
    end
 
    mouse_dy = 0
@@ -253,10 +283,13 @@ function love.draw()
    lg.circle("fill", 0, 0, 10)
 
    -- Mouse
-   mouse_x, mouse_y = lm:getPosition()
-   lg.setColor(0, 1, 0, 1)
-   local mx, my = cam:to_world(mouse_x, mouse_y)
-   lg.circle("fill", mx, my, 10)
+   -- mouse_x, mouse_y = lm:getPosition()
+   -- lg.setColor(0, 1, 0, 1)
+   -- local mx, my = cam:to_world(mouse_x, mouse_y)
+   -- lg.circle("fill", mx, my, 10)
+
+   lg.setColor(1,1,1,1)
+   lg.print(world:getJointCount())
 
    cam:revert()
    --lg.setCanvas()
