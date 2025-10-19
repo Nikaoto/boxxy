@@ -92,7 +92,7 @@ function love.load()
          local c = Connection:new({
             startpoint = Vector:new(
                px + parent.connections[k].char * CHAR_W - parent.w/2,
-               5 + py + parent.connections[k].line * CHAR_H - parent.h/2),
+               56 + 5 + py + parent.connections[k].line * CHAR_H - parent.h/2), -- 56 for box text paddings
             endpoint = Vector:new(cx - child.w/2, cy - child.h/2)
          })
          table.insert(objects, c)

@@ -13,6 +13,8 @@ local Box = Class:extend({
 
    padding = 16,
    title_padding = 8,
+
+   outline = 10,
 })
 
 function Box:init()
@@ -44,10 +46,29 @@ function Box:resizeToText()
 end
 
 function Box:draw_connection_points()
-   
+
+end
+
+function Box:isMouseOver()
+   local mx, my = love.mouse.getPosition()
+   local x, y = self.body:getPosition()
+
+   local left   = x - self.w / 2
+   local right  = x + self.w / 2
+   local top    = y - self.h / 2
+   local bottom = y + self.h / 2
+
+   return mx >= left and mx <= right and my >= top and my <= bottom
 end
 
 function Box:draw()
+   
+   if self:isMouseOver() then
+      lg.setColor(1, 1, 1)
+      lg.rectangle("fill", self.x - (self.w + self.outline) / 2, 
+                  self.y - (self.h + self.outline) / 2, 
+                  self.w + self.outline, self.h + self.outline)
+   end
 
    local x, y = self.body:getPosition()
 
@@ -61,7 +82,14 @@ function Box:draw()
    local title_y = y - self.h / 2 + self.title_padding
    lg.draw(self.title_obj, math.floor(title_x, 0.5), math.floor(title_y, 0.5))
 
-   -- draw main text below title
+   -- draw line under title
+   lg.setColor(1, 1, 1)
+   local line_y = title_y + self.title_obj:getHeight() + self.title_padding / 2
+   lg.setColor(0.9, 0.9, 0.9)
+   lg.setLineWidth(2)
+   lg.line(x - self.w / 2 + self.title_padding, line_y, x + self.w / 2 - self.title_padding, line_y)
+
+   -- draw code 
    lg.setColor(1, 1, 1)
    local text_x = x - self.w / 2 + self.padding
    local text_y = y - self.h / 2 + self.padding + self.title_obj:getHeight() + self.padding
