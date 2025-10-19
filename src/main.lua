@@ -255,6 +255,8 @@ function drawGrid(cameraX, cameraY, zoom)
 end
 
 function love.draw()
+   lg.setColor(colors.background)
+   lg.clear()
    table.stable_sort(objects, function(a,b)
       return (a.z or 0) < (b.z or 0)
    end)
