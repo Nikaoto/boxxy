@@ -3,8 +3,8 @@ local cursor = {
    spawn_x = 0,
    spawn_y = 0,
    obj_type = 2,
-   collider_r = 10,
-   collider_mass = 1000,
+   collider_r = 14,
+   collider_mass = 1200,
    collider_sensor = true,
    collider_gravity_scale = 0,
 
@@ -25,6 +25,7 @@ end
 function cursor:start_dragging(obj)
    if not self.drag_objects[obj] then
       table.insert(self.schedule, function()
+         obj.body:setLinearDamping(20,20)
          local x, y = self.body:getPosition()
          local joint = lp.newDistanceJoint(
             self.body,
@@ -33,8 +34,8 @@ function cursor:start_dragging(obj)
             x, y,
             false
          )
-         joint:setFrequency(80)
-         joint:setDampingRatio(1)
+         joint:setFrequency(300)
+         joint:setDampingRatio(0.1)
          self.drag_objects[obj] = {
             inital_x = x,
             inital_y = y,
@@ -52,6 +53,7 @@ function cursor:stop_dragging(obj)
    end
 
    table.insert(self.schedule, function()
+      obj.body:setLinearDamping(20,20)
       self.drag_objects[obj].joint:destroy()
       self.drag_objects[obj] = nil
       self.drag_count = self.drag_count - 1

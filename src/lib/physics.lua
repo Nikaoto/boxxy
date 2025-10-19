@@ -29,11 +29,7 @@ function physics.add_physics(obj, world)
       obj.spawn_y,
       obj.collider_type or "dynamic"
    )
-   if obj.collider_fixed_rotation == true then
-      obj.body:setFixedRotation(true)
-   else
-      obj.body:setFixedRotation(false)
-   end
+   obj.body:setFixedRotation(true)
    obj.body:setLinearDamping(obj.linear_damping or 0.9)
    obj.body:setAngularDamping(obj.angular_damping or 0.3)
 

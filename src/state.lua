@@ -168,31 +168,6 @@ function make_state_from_dir(dir)
    lib.ts_parser_set_language(parser, lang.tree_sitter_c())
 
    local ctx = make_ctx([[
-int update() {
-   printf("bellow!");
-   return 0;
-}
-
-int main() {
-    printf("Hello, world!\n");
-    update();
-    return 0;
-}
-
-#include <stdlib.h>
-#include <string.h>
-#include "ascii.h"
-#include "buffer.h"
-#include "xmalloc.h"
-
-#ifndef MIN
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif
-
 // Allocates new Buffer and its data
 Buffer*
 new_buf(size_t data_size)
@@ -375,8 +350,6 @@ print_buf_ascii(FILE *stream, Buffer *buf)
         }
     }
 }
-
-
 ]])
 
    local fns = {}

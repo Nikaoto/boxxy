@@ -2,8 +2,8 @@
 debugger = require("lib/debugger")
 require("lib/print")
 
-CHAR_W = 16
-CHAR_H = 20
+CHAR_W = 1.5
+CHAR_H = 1.5
 RENDER_WIDTH = 1920
 RENDER_HEIGHT = 1080
 MOUSE_MOVE_MARGIN = 100
@@ -55,8 +55,10 @@ lg = love.graphics
 lk = love.keyboard
 lm = love.mouse
 font = lg.newFont('fixedsys.ttf', 24)
+tfont = lg.newFont('fixedsys.ttf', 128)
 
 Box = require("Box")
+Text = require("Text")
 Connection = require("Connection")
 
 cam = Camera:new({
@@ -135,10 +137,9 @@ function love.load()
          end)
          if not k then break end
          local c = Connection:new({
-            startpoint = Vector:new(
-               px + parent.connections[k].char * CHAR_W - parent.w/2,
-               56 + 5 + py + parent.connections[k].line * CHAR_H - parent.h/2), -- 56 for box text paddings
-            endpoint = Vector:new(cx - child.w/2, cy - child.h/2)
+            parent_obj = parent,
+            child_obj = child,
+            conn_data = parent.connections[k],
          })
          table.insert(objects, c)
       end
@@ -156,28 +157,21 @@ function love.wheelmoved(x, y)
 end
 
 function love.keypressed(key)
-   if key == "c" then
-      -- Spawn connections
-      for parent_id, child_ids in pairs(conns_map) do
-         local parent = boxes_by_id[parent_id]
-         local px, py = parent.body:getPosition()
-         for i, child_id in ipairs(child_ids) do
-            local child = boxes_by_id[child_id]
-            local cx, cy = child.body:getPosition()
-            local k = table.ifind_fn(parent.connections, function(v)
-               return v.fn_id == child.fn_id
-            end)
-            if not k then break end
-            local c = Connection:new({
-               startpoint = Vector:new(
-                  px + parent.connections[k].char * CHAR_W - parent.w/2,
-                  5 + py + parent.connections[k].line * CHAR_H - parent.h/2),
-               endpoint = Vector:new(cx - child.w/2, cy - child.h/2)
-            })
-            table.insert(objects, c)
-         end
-      end
+   if key == "t" then
+       local mx, my = cam:to_world(mouse_x, mouse_y)
+       table.insert(objects, Text:new({
+           spawn_x = mx,
+           spawn_y = my,
+           text = rand.choice({
+               "Sample Text", "Renderer", "Ligma", "TransactionBuilderFactory"}),
+       }))
    end
+
+    if key == "0" then
+        cam.zoom = 0.3
+        cam.x = 0
+        cam.y = 0
+    end
 end
 
 function love.mousereleased(x, y, button, istouch, presses)
@@ -201,7 +195,7 @@ function love.update(dt)
    end
 
    if mouse_dy ~= 0 then
-      cam:do_rel_zoom(mouse_dy, mouse_x, mouse_y)
+      cam:do_zoom(mouse_dy)
    end
 
    -- Camera movement
@@ -262,7 +256,7 @@ end
 
 function love.draw()
    table.stable_sort(objects, function(a,b)
-      return (a.z or 0) > (b.z or 0)
+      return (a.z or 0) < (b.z or 0)
    end)
 
    --lg.setCanvas(canvas)
@@ -277,10 +271,9 @@ function love.draw()
       box:draw()
    end
    
-
    -- Center
-   lg.setColor(1, 0, 0, 1)
-   lg.circle("fill", 0, 0, 10)
+   -- lg.setColor(1, 0, 0, 1)
+   -- lg.circle("fill", 0, 0, 10)
 
    -- Mouse
    -- mouse_x, mouse_y = lm:getPosition()
